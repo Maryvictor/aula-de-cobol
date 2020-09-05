@@ -1,0 +1,119 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 26-May-20 15:30 Page   1
+*                                      PGM04.CBL
+* Options: LIST(PGM04.LST) ASMLIST(PGM04.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       PGM04.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     26/05/2020.
+     6 DATE-COMPILED. 26-May-20 15:30.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE UM REGISTRO COM DEZ PARCELAS E SOMA O TOTAL.
+     9
+    10
+    11 ENVIRONMENT             DIVISION.
+    12
+    13 CONFIGURATION SECTION.
+    14       SOURCE-COMPUTER. MARIA-PC.
+    15       OBJECT-COMPUTER. MARIA-PC.
+    16       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    17 INPUT-OUTPUT SECTION.
+    18 FILE-CONTROL.
+    19
+    20     SELECT   CADPAG           ASSIGN      TO      DISK
+    21     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    22     SELECT   CADREC           ASSIGN      TO      DISK
+    23     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    24
+    25 DATA      DIVISION.
+    26
+    27 FILE SECTION.
+    28 FD  CADPAG
+    29     LABEL         RECORD          ARE     STANDARD
+    30     VALUE        OF FILE-ID       IS      "CADPAG.DAT".
+    31
+    32 01   REG-ENT.
+    33       02 CODIGO-ENT      PIC 9(05).
+    34       02 NOME-ENT        PIC X(30).
+    35       02 PARCELAS        PIC 9(05)V9(02)
+    36                           OCCURS 10 TIMES.
+    37 FD  CADREC
+    38     LABEL RECORD ARE  STANDARD.
+    39
+    40 01   REG-SAI.
+    41       02 CODIGO-SAI         PIC 9(05).
+    42       02 NOME-SAI           PIC X(30).
+    43       02 TOTALPG-SAI        PIC 9(05)V9(02).
+    44
+    45
+    46 WORKING-STORAGE SECTION.
+    47
+    48 77  FIM-ARQ          PIC X(03)            VALUE "NAO".
+    49 77  CTR              PIC 9(02)            VALUE ZEROS.
+    50 77  TOTAL            PIC 9(05)V9(02)      VALUE ZEROES.
+    51
+    52 PROCEDURE                                   DIVISION.
+    53
+    54 EM02-PGM04.
+    55
+    56         PERFORM    INICIO.
+    57
+* Microsoft COBOL Version 4.5        L2.4 revision 002 26-May-20 15:30 Page   2
+*                                      PGM04.CBL
+    58         PERFORM    PRINCIPAL
+    59              UNTIL   FIM-ARQ      EQUAL     "SIM".
+    60     PERFORM    FIM.
+    61
+    62     STOP RUN.
+    63
+    64 INICIO.
+    65
+    66     OPEN INPUT       CADPAG
+    67          OUTPUT      CADREC.
+    68     PERFORM   LEITURA.
+    69
+    70
+    71
+    72 LEITURA.
+    73     READ CADPAG
+    74          AT END
+    75          MOVE "SIM" TO FIM-ARQ.
+    76
+    77
+    78
+    79
+    80 PRINCIPAL.
+    81
+    82     PERFORM ACUMULA-PG.
+    83     PERFORM GRAVA-SAI.
+    84     PERFORM LEITURA.
+    85
+    86 ACUMULA-PG.
+    87     MOVE    ZEROS         TO TOTAL.
+    88     MOVE    1             TO CTR.
+    89     PERFORM SOMA-TAB      10 TIMES.
+    90
+    91
+    92
+    93 SOMA-TAB.
+    94     ADD PARCELAS (CTR)    TO TOTAL.
+    95     ADD 1                 TO CTR.
+    96
+    97 GRAVA-SAI.
+    98     MOVE CODIGO-ENT       TO CODIGO-SAI.
+    99     MOVE NOME-ENT         TO NOME-SAI.
+   100     MOVE TOTAL            TO TOTALPG-SAI.
+   101     WRITE REG-SAI.
+   102
+   103
+   104 FIM.
+   105
+   106     CLOSE CADPAG
+   107           CADREC.
+   108
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1132     Code:         375     Dictionary:        1260

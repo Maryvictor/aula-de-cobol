@@ -1,0 +1,192 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 14-Jun-20 22:51 Page   1
+*                                        EX.CBL
+* Options: LIST(EX.LST) ASMLIST(EX.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       LE-IMPRIME.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     01/06/2020.
+     6 DATE-COMPILED. 14-Jun-20 22:51.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE UM ARQUIVO E IMPRIME UM RELATORIO.
+     9 ENVIRONMENT             DIVISION.
+    10
+    11 CONFIGURATION SECTION.
+    12       SOURCE-COMPUTER. MARIA-PC.
+    13       OBJECT-COMPUTER. MARIA-PC.
+    14       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    15 INPUT-OUTPUT SECTION.
+    16 FILE-CONTROL.
+    17
+    18     SELECT   ENTRADA           ASSIGN      TO      DISK
+    19     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    20     SELECT   TRAB              ASSIGN      TO      DISK.
+    21     SELECT   RELAT             ASSIGN      TO      DISK.
+    22
+    23 DATA                           DIVISION.
+    24
+    25 FILE SECTION.
+    26 FD  ENTRADA
+    27     LABEL         RECORD          ARE     STANDARD
+    28     VALUE        OF FILE-ID       IS      "ENT.DAT".
+    29
+    30 01  REG-ENT.
+    31       02 COD-ENT       PIC 9(04).
+    32       02 SEXO-ENT      PIC X(01).
+    33       02 NOME-ENT       PIC X(30).
+    34
+    35 SD  TRAB.
+    36 01  REG-TRAB.
+    37       02 COD-TRAB       PIC 9(04).
+    38       02 SEXO-TRAB      PIC X(01).
+    39       02 NOME-TRAB       PIC X(30).
+    40
+    41
+    42 FD  RELAT
+    43     LABEL         RECORD         IS          OMITTED.
+    44
+    45 01  REG-REL           PIC X(80).
+    46
+    47
+    48 WORKING-STORAGE SECTION.
+    49
+    50 77  FIM-ARQ          PIC X(03)             VALUE   "NAO".
+    51 77  CT-LIN           PIC 9(02)             VALUE  25.
+    52 77  CT-PAG           PIC 9(02)             VALUE  ZEROES.
+    53
+    54 01  CAB-01.
+    55     02 FILLER         PIC X(70) VALUE SPACES.
+    56     02 FILLER         PIC X(05) VALUE "PAG. ".
+    57     02 VAR-PAG        PIC 9(02).
+* Microsoft COBOL Version 4.5        L2.4 revision 002 14-Jun-20 22:51 Page   2
+*                                        EX.CBL
+    58     02 FILLER         PIC X(03) VALUE SPACES.
+    59
+    60 01  CAB-02.
+    61     02 FILLER         PIC X(15) VALUE SPACES.
+    62     02 FILLER         PIC X(25) VALUE "RELATORIO DE USUARIOS DO".
+    63     02 FILLER         PIC X(15) VALUE "SEXO MASCULINO".
+    64     02 FILLER         PIC X(25) VALUE SPACES.
+    65
+    66 01  CAB-03.
+    67     02 FILLER         PIC X(5)  VALUE SPACES.
+    68     02 FILLER         PIC X(6) VALUE "CODIGO".
+    69     02 FILLER         PIC X(10) VALUE SPACES.
+    70     02 FILLER         PIC X(04) VALUE "SEXO".
+    71     02 FILLER         PIC X(05) VALUE SPACES.
+    72     02 FILLER         PIC X(04) VALUE "NOME".
+    73     02 FILLER         PIC X(46) VALUE SPACES.
+    74
+    75
+    76 01  DETALHE.
+    77     02 FILLER         PIC X(05) VALUE SPACES.
+    78     02 COD-DET        PIC 9(04).
+    79     02 FILLER         PIC X(13) VALUE SPACES.
+    80     02 SEXO-DET       PIC X(01).
+    81     02 FILLER         PIC X(02) VALUE SPACES.
+    82     02 NOME-DET       PIC X(30).
+    83     02 FILLER         PIC X(25) VALUE SPACES.
+    84
+    85 PROCEDURE                                   DIVISION.
+    86
+    87 PGM-EX.
+    88
+    89     SORT TRAB
+    90          ASCENDING KEY COD-TRAB
+    91          INPUT  PROCEDURE ROT-ENTRADA
+    92          OUTPUT PROCEDURE ROT-SAIDA.
+    93     STOP RUN.
+    94
+    95 ROT-ENTRADA   SECTION.
+    96     PERFORM INICIO-ENTRADA.
+    97     PERFORM PRINCIPAL-ENTRADA
+    98             UNTIL
+    99             FIM-ARQ EQUAL "SIM".
+   100     PERFORM FIM-ENTRADA.
+   101
+   102 INICIO-ENTRADA SECTION.
+   103     OPEN INPUT ENTRADA
+   104     PERFORM LEITURA-ENTRADA.
+   105
+   106 LEITURA-ENTRADA SECTION.
+   107     READ ENTRADA
+   108          AT END
+   109          MOVE "SIM" TO FIM-ARQ.
+   110
+   111 PRINCIPAL-ENTRADA SECTION.
+   112     PERFORM SELECAO-ENTRADA.
+   113     PERFORM LEITURA-ENTRADA.
+   114
+   115 SELECAO-ENTRADA SECTION.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 14-Jun-20 22:51 Page   3
+*                                        EX.CBL
+   116     IF SEXO-ENT EQUAL "M"
+   117         PERFORM GRAVACAO-ENTRADA.
+   118
+   119 GRAVACAO-ENTRADA SECTION.
+   120     MOVE COD-ENT   TO COD-TRAB.
+   121     MOVE SEXO-ENT  TO SEXO-TRAB.
+   122     MOVE NOME-ENT  TO NOME-TRAB.
+   123     RELEASE REG-TRAB.
+   124
+   125 FIM-ENTRADA SECTION.
+   126     CLOSE ENTRADA.
+   127
+   128
+   129 ROT-SAIDA SECTION.
+   130     PERFORM INICIO-SAIDA.
+   131     PERFORM PRINCIPAL-SAIDA
+   132             UNTIL
+   133             FIM-ARQ EQUAL "SIM".
+   134     PERFORM FIM-SAIDA.
+   135
+   136 INICIO-SAIDA SECTION.
+   137     MOVE "NAO" TO FIM-ARQ.
+   138     OPEN  OUTPUT RELAT.
+   139     PERFORM LE-SAIDA.
+   140
+   141 LE-SAIDA SECTION.
+   142     RETURN TRAB
+   143            AT END
+   144            MOVE "SIM" TO FIM-ARQ.
+   145
+   146 PRINCIPAL-SAIDA SECTION.
+   147     PERFORM IMPRESSAO-SAIDA.
+   148     PERFORM LE-SAIDA.
+   149
+   150 IMPRESSAO-SAIDA SECTION.
+   151     IF CT-LIN GREATER THAN 24
+   152        PERFORM CABECALHO-SAIDA.
+   153     PERFORM DETALHE-SAIDA.
+   154
+   155 DETALHE-SAIDA SECTION.
+   156
+   157     MOVE      COD-TRAB     TO         COD-DET.
+   158     MOVE      SEXO-TRAB    TO         SEXO-DET.
+   159     MOVE      NOME-TRAB    TO         NOME-DET.
+   160     WRITE     REG-REL FROM DETALHE AFTER ADVANCING 1 LINE.
+   161     ADD       1            TO          CT-LIN.
+   162
+   163 CABECALHO-SAIDA SECTION.
+   164     ADD       1            TO    CT-PAG.
+   165     MOVE CT-PAG            TO    VAR-PAG.
+   166     WRITE REG-REL AFTER ADVANCING PAGE.
+   167     WRITE REG-REL FROM CAB-01 AFTER ADVANCING 1 LINE.
+   168     WRITE REG-REL FROM CAB-02 AFTER ADVANCING 2 LINES.
+   169     WRITE REG-REL FROM CAB-03 AFTER ADVANCING 2 LINES.
+   170     MOVE ZEROES TO CT-LIN.
+   171
+   172
+   173
+* Microsoft COBOL Version 4.5        L2.4 revision 002 14-Jun-20 22:51 Page   4
+*                                        EX.CBL
+   174 FIM-SAIDA SECTION.
+   175     CLOSE       RELAT.
+   176
+   177
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1628     Code:         918     Dictionary:        2392

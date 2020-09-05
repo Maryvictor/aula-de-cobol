@@ -1,0 +1,156 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 01-Jun-20 13:15 Page   1
+*                                       EM01.CBL
+* Options: LIST(EM01.LST) ASMLIST(EM01.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       LE-IMPRIME.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     01/06/2020.
+     6 DATE-COMPILED. 01-Jun-20 13:15.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE UM ARQUIVO E IMPRIME UM RELATORIO.
+     9 ENVIRONMENT             DIVISION.
+    10
+    11 CONFIGURATION SECTION.
+    12       SOURCE-COMPUTER. MARIA-PC.
+    13       OBJECT-COMPUTER. MARIA-PC.
+    14       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    15 INPUT-OUTPUT SECTION.
+    16 FILE-CONTROL.
+    17
+    18     SELECT   CAD-USU           ASSIGN      TO      DISK
+    19     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    20     SELECT   REL-ATR           ASSIGN      TO      DISK.
+    21
+    22 DATA                           DIVISION.
+    23
+    24 FILE SECTION.
+    25 FD  CAD-USU
+    26     LABEL         RECORD          ARE     STANDARD
+    27     VALUE        OF FILE-ID       IS      "CAD-USU.DAT".
+    28
+    29 01  REG-USU.
+    30       02 COD-USU       PIC 9(04).
+    31       02 NOM-USU       PIC X(30).
+    32       02 DATA-USU.
+    33          03 DIA        PIC 9(02).
+    34          03 MES        PIC 9(02).
+    35          03 ANO        PIC 9(04).
+    36
+    37 FD  REL-ATR
+    38     LABEL         RECORD         IS          OMITTED.
+    39
+    40 01  REG-ATR           PIC X(80).
+    41
+    42
+    43 WORKING-STORAGE SECTION.
+    44
+    45 77  FIM-ARQ          PIC X(03)             VALUE   "NAO".
+    46 77  CT-LIN           PIC 9(02)             VALUE  25.
+    47 77  CT-PAG           PIC 9(02)             VALUE  ZEROES.
+    48
+    49 01  CAB-01.
+    50     02 FILLER         PIC X(70) VALUE SPACES.
+    51     02 FILLER         PIC X(05) VALUE "PAG. ".
+    52     02 VAR-PAG        PIC 9(03).
+    53     02 FILLER         PIC X(02) VALUE SPACES.
+    54
+    55 01  CAB-02.
+    56     02 FILLER         PIC X(15) VALUE SPACES.
+    57     02 FILLER         PIC X(25) VALUE "RELATORIO DE USUARIOS DA".
+* Microsoft COBOL Version 4.5        L2.4 revision 002 01-Jun-20 13:15 Page   2
+*                                       EM01.CBL
+    58     02 FILLER         PIC X(24) VALUE " BIBLIOTECA BOM TEMPO".
+    59     02 FILLER         PIC X(16) VALUE SPACES.
+    60
+    61 01  CAB-03.
+    62     02 FILLER         PIC X(5)  VALUE SPACES.
+    63     02 FILLER         PIC X(6) VALUE "CODIGO".
+    64     02 FILLER         PIC X(19) VALUE SPACES.
+    65     02 FILLER         PIC X(04) VALUE "NOME".
+    66     02 FILLER         PIC X(20) VALUE SPACES.
+    67     02 FILLER         PIC X(21) VALUE "DATA DE CADASTRAMENTO".
+    68     02 FILLER         PIC X(05) VALUE SPACES.
+    69
+    70 01  DETALHE.
+    71     02 FILLER         PIC X(06) VALUE SPACES.
+    72     02 COD            PIC 9(04).
+    73     02 FILLER         PIC X(06) VALUE SPACES.
+    74     02 NOM            PIC X(30).
+    75     02 FILLER         PIC X(13) VALUE SPACES.
+    76     02 DDD            PIC 9(02).
+    77     02 FILLER         PIC X(01) VALUE "/".
+    78     02 MMM            PIC 9(02).
+    79     02 FILLER         PIC X(01) VALUE "/".
+    80     02 AAA            PIC 9(04).
+    81     02 FILLER         PIC X(11) VALUE SPACES.
+    82
+    83 PROCEDURE                                   DIVISION.
+    84
+    85 PGM-EX05.
+    86
+    87         PERFORM    INICIO.
+    88
+    89         PERFORM    PRINCIPAL
+    90              UNTIL   FIM-ARQ      EQUAL     "SIM".
+    91
+    92         PERFORM   FIM.
+    93
+    94     STOP RUN.
+    95 INICIO.
+    96
+    97     OPEN INPUT       CAD-USU
+    98         OUTPUT       REL-ATR.
+    99
+   100     PERFORM       LEITURA.
+   101
+   102
+   103 LEITURA.
+   104
+   105     READ CAD-USU
+   106              AT END
+   107              MOVE  "SIM"        TO        FIM-ARQ.
+   108 PRINCIPAL.
+   109
+   110         PERFORM             IMPRESSAO.
+   111         PERFORM             LEITURA.
+   112
+   113 IMPRESSAO.
+   114     IF CT-LIN GREATER THAN 24
+   115        PERFORM CABECALHO.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 01-Jun-20 13:15 Page   3
+*                                       EM01.CBL
+   116     PERFORM IMPDET.
+   117
+   118 IMPDET.
+   119
+   120     MOVE      COD-USU      TO          COD.
+   121     MOVE      NOM-USU      TO          NOM.
+   122     MOVE      DIA          TO          DDD.
+   123     MOVE      MES          TO          MMM.
+   124     MOVE      ANO          TO          AAA.
+   125     WRITE     REG-ATR FROM DETALHE AFTER ADVANCING 1 LINE.
+   126     ADD       1            TO          CT-LIN.
+   127
+   128 CABECALHO.
+   129     ADD       1            TO    CT-PAG.
+   130     MOVE CT-PAG            TO    VAR-PAG.
+   131     WRITE REG-ATR AFTER ADVANCING PAGE.
+   132     WRITE REG-ATR FROM CAB-01 AFTER ADVANCING 1 LINE.
+   133     WRITE REG-ATR FROM CAB-02 AFTER ADVANCING 2 LINES.
+   134     WRITE REG-ATR FROM CAB-03 AFTER ADVANCING 2 LINES.
+   135     MOVE ZEROES TO CT-LIN.
+   136
+   137
+   138
+   139 FIM.
+   140     CLOSE       CAD-USU
+   141                 REL-ATR.
+   142
+   143
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1428     Code:         533     Dictionary:        1624

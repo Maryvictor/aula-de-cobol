@@ -1,0 +1,146 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 26-May-20 08:45 Page   1
+*                                       EX03.CBL
+* Options: LIST(EX03.LST) ASMLIST(EX03.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       TAB02.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     23/05/2020.
+     6 DATE-COMPILED. 26-May-20 08:45.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE UM ARQUIVO COM DATA(DIA, MES, ANO) E GRAVA A
+     9*          DATA POR EXTENSO UTILIZANDO UMA TABELA PRE-DEFINIDA.
+    10
+    11 ENVIRONMENT             DIVISION.
+    12
+    13 CONFIGURATION SECTION.
+    14       SOURCE-COMPUTER. MARIA-PC.
+    15       OBJECT-COMPUTER. MARIA-PC.
+    16       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    17 INPUT-OUTPUT SECTION.
+    18 FILE-CONTROL.
+    19
+    20     SELECT   ARQ-ENT          ASSIGN      TO      DISK
+    21     ORGANIZATION   IS          LINE         SEQUENTIAL.
+    22
+    23     SELECT   CAD-SAI           ASSIGN      TO      DISK
+    24     ORGANIZATION    IS         LINE         SEQUENTIAL.
+    25
+    26
+    27 DATA                           DIVISION.
+    28
+    29 FILE SECTION.
+    30 FD  ARQ-ENT
+    31     LABEL         RECORD          ARE     STANDARD
+    32     VALUE        OF FILE-ID       IS      "ARQ-ENT.DAT".
+    33
+    34 01  REG-ENT.
+    35       02 COD-ENT   PIC 9(003).
+    36       02 DATA-ENT.
+    37          03 DD-ENT PIC 9(002).
+    38          03 MM-ENT PIC 9(002).
+    39          03 AA-ENT PIC 9(002).
+    40
+    41
+    42
+    43 FD  CAD-SAI
+    44     LABEL         RECORD         ARE        STANDARD.
+    45
+    46 01  REG-SAI.
+    47     02 COD-SAI    PIC 9(003).
+    48     02 DATA-SAI.
+    49        03 DD-SAI  PIC 9(002).
+    50        03 MM-SAI  PIC X(009).
+    51        03 AA-SAI  PIC 9(002).
+    52
+    53
+    54
+    55 WORKING-STORAGE SECTION.
+    56
+    57 77  FIM-ARQ          PIC X(03)             VALUE   "NAO".
+* Microsoft COBOL Version 4.5        L2.4 revision 002 26-May-20 08:45 Page   2
+*                                       EX03.CBL
+    58
+    59
+    60 01 TABELA-MES.
+    61     02   DEF-MES.
+    62       03 FILLER PIC x(009)   VALUE "JANEIRO".
+    63       03 FILLER PIC x(009)   VALUE "FEVEREIRO".
+    64       03 FILLER PIC x(009)   VALUE "MARCO".
+    65       03 FILLER PIC x(009)   VALUE "ABRIL".
+    66       03 FILLER PIC x(009)   VALUE "MAIO".
+    67       03 FILLER PIC x(009)   VALUE "JUNHO".
+    68       03 FILLER PIC x(009)   VALUE "JULHO".
+    69       03 FILLER PIC x(009)   VALUE "AGOSTO".
+    70       03 FILLER PIC x(009)   VALUE "SETEMBRO".
+    71       03 FILLER PIC x(009)   VALUE "OUTUBRO".
+    72       03 FILLER PIC x(009)   VALUE "NOVEMBRO".
+    73       03 FILLER PIC x(009)   VALUE "DEZEMBRO".
+    74
+    75 01  TABELA-MES-RED  REDEFINES TABELA-MES.
+    76    02 MES           PIC X(009)
+    77                     OCCURS 12 TIMES.
+    78
+    79
+    80 PROCEDURE                                   DIVISION.
+    81
+    82 PGM-NIVEL88.
+    83
+    84         PERFORM    INICIO.
+    85
+    86         PERFORM    PRINCIPAL
+    87              UNTIL   FIM-ARQ      EQUAL     "SIM".
+    88
+    89         PERFORM   TERMINO.
+    90
+    91     STOP RUN.
+    92
+    93 INICIO.
+    94
+    95     OPEN INPUT       ARQ-ENT
+    96          OUTPUT      CAD-SAI.
+    97
+    98
+    99     PERFORM       LEITURA.
+   100
+   101
+   102 LEITURA.
+   103
+   104     READ ARQ-ENT
+   105              AT END
+   106              MOVE  "SIM"        TO        FIM-ARQ.
+   107 PRINCIPAL.
+   108
+   109         PERFORM             PESQUISA-TABELA.
+   110     PERFORM             GRAVA-SAI.
+   111         PERFORM             LEITURA.
+   112
+   113 PESQUISA-TABELA.
+   114     MOVE        MES(MM-ENT) TO MM-SAI.
+   115
+* Microsoft COBOL Version 4.5        L2.4 revision 002 26-May-20 08:45 Page   3
+*                                       EX03.CBL
+   116
+   117 GRAVA-SAI.
+   118     MOVE COD-ENT TO COD-SAI.
+   119     MOVE DD-ENT  TO DD-SAI.
+   120     MOVE AA-ENT  TO AA-SAI.
+   121     WRITE REG-SAI.
+   122
+   123
+   124
+   125
+   126
+   127
+   128 TERMINO.
+   129     CLOSE       ARQ-ENT
+   130                 CAD-SAI.
+   131
+   132
+   133
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1104     Code:         337     Dictionary:        1410

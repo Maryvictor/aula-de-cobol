@@ -1,0 +1,127 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 10:12 Page   1
+*                                      PGM06.CBL
+* Options: LIST(PGM06.LST) ASMLIST(PGM06.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       EXE.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     09/06/2020.
+     6 DATE-COMPILED. 09-Jun-20 10:12.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE OS REGISTRO DO ARQUIVO DE
+     9*          ENTRADA CADENT, ORDENA POR PELA PONTUACAO MAIOR
+    10*          (USANDO SORTE) E GRAVA NO ARQUIVO DE SAIDA CADVEST
+    11*          PONTUACAO MAIOR OU IGUAL A 70 APENAS.
+    12
+    13 ENVIRONMENT             DIVISION.
+    14
+    15 CONFIGURATION SECTION.
+    16       SOURCE-COMPUTER. MARIA-PC.
+    17       OBJECT-COMPUTER. MARIA-PC.
+    18       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    19 INPUT-OUTPUT SECTION.
+    20 FILE-CONTROL.
+    21
+    22     SELECT   CADENT       ASSIGN      TO      DISK
+    23     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    24     SELECT   TRAB          ASSIGN      TO      DISK.
+    25
+    26     SELECT   CADVEST           ASSIGN      TO      DISK
+    27     ORGANIZATION    IS         LINE          SEQUENTIAL.
+    28 DATA                           DIVISION.
+    29
+    30 FILE SECTION.
+    31 FD  CADENT
+    32     LABEL         RECORD          ARE     STANDARD
+    33     VALUE        OF FILE-ID       IS      "CADENT1.DAT".
+    34
+    35 01  REG-ENT.
+    36     02 CPF-ENT       PIC 9(11).
+    37     02 NOME-ENT      PIC X(30).
+    38     02 PONT-ENT      PIC 9(03).
+    39
+    40 SD  TRAB.
+    41 01  REG-TRA.
+    42     02 CPF-TRAB       PIC 9(11).
+    43     02 NOME-TRAB      PIC X(30).
+    44     02 PONT-TRAB      PIC 9(03).
+    45
+    46
+    47
+    48 FD  CADVEST
+    49     LABEL         RECORD         ARE        STANDARD
+    50     VALUE        OF FILE-ID      IS       "CADVEST.DAT".
+    51
+    52 01   REG-SAI.
+    53      03 CPF-SAI       PIC 9(11).
+    54      03 NOME-SAI      PIC X(30).
+    55      03 PONT-SAI      PIC 9(03).
+    56
+    57
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 10:12 Page   2
+*                                      PGM06.CBL
+    58
+    59 WORKING-STORAGE SECTION.
+    60
+    61 77    FIM-ARQ          PIC X(03) VALUE "NAO".
+    62
+    63
+    64 PROCEDURE                                   DIVISION.
+    65
+    66 PGM-06.
+    67
+    68         SORT    TRAB
+    69             DESCENDING KEY PONT-TRAB
+    70             INPUT PROCEDURE ROT-ENTRADA
+    71             GIVING CADVEST.
+    72      STOP RUN.
+    73
+    74 ROT-ENTRADA      SECTION.
+    75     PERFORM INICIO-ENTRADA.
+    76     PERFORM PRINCIPAL-ENTRADA
+    77          UNTIL FIM-ARQ EQUAL "SIM".
+    78     PERFORM FIM-ENTRADA.
+    79
+    80 INICIO-ENTRADA SECTION.
+    81     OPEN INPUT CADENT.
+    82     PERFORM LEITURA-ENTRADA.
+    83
+    84
+    85
+    86 LEITURA-ENTRADA   SECTION.
+    87     READ CADENT
+    88          AT END
+    89          MOVE "SIM"  TO FIM-ARQ.
+    90
+    91 PRINCIPAL-ENTRADA    SECTION.
+    92     PERFORM SELECAO-ENTRADA.
+    93     PERFORM LEITURA-ENTRADA.
+    94
+    95 SELECAO-ENTRADA      SECTION.
+    96     IF  PONT-ENT    >=    70
+    97         PERFORM GRAVACAO-ENTRADA.
+    98
+    99 GRAVACAO-ENTRADA     SECTION.
+   100     MOVE CPF-ENT  TO CPF-TRAB.
+   101     MOVE NOME-ENT TO NOME-TRAB.
+   102     MOVE PONT-ENT TO PONT-TRAB.
+   103     RELEASE REG-TRA.
+   104
+   105 FIM-ENTRADA  SECTION.
+   106     CLOSE   CADENT.
+   107
+   108
+   109
+   110
+   111
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 10:12 Page   3
+*                                      PGM06.CBL
+* Total Messages:     0
+* Unrecoverable :     0                    Severe  :     0
+* Errors        :     0                    Warnings:     0
+* Informational :     0                    Flags   :     0
+* Data:        1268     Code:         493     Dictionary:        1618

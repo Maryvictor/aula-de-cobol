@@ -1,0 +1,126 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 10:03 Page   1
+*                                       PGM.CBL
+* Options: LIST(PGM.LST) ASMLIST(PGM.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       PGM06.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     09/06/2020.
+     6 DATE-COMPILED. 09-Jun-20 10:03.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE OS REGISTRO DO ARQUIVO DE
+     9*          ENTRADA CADENT, E GRAVA OS REGISTROS DE PESSOAS COM
+    10*          PONTUACAO MAIOR OU IGUAL QUE 70 NO CADVEST.
+    11
+    12 ENVIRONMENT             DIVISION.
+    13
+    14 CONFIGURATION SECTION.
+    15       SOURCE-COMPUTER. MARIA-PC.
+    16       OBJECT-COMPUTER. MARIA-PC.
+    17       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    18 INPUT-OUTPUT SECTION.
+    19 FILE-CONTROL.
+    20
+    21     SELECT   CADENT       ASSIGN      TO      DISK
+    22     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    23     SELECT   TRAB          ASSIGN      TO      DISK.
+    24
+    25     SELECT   CADVEST           ASSIGN      TO      DISK
+    26     ORGANIZATION    IS         LINE          SEQUENTIAL.
+    27 DATA                           DIVISION.
+    28
+    29 FILE SECTION.
+    30 FD  CADENT
+    31     LABEL         RECORD          ARE     STANDARD
+    32     VALUE        OF FILE-ID       IS      "CADENT1.DAT".
+    33
+    34 01  REG-ENT.
+    35     02 CPF-ENT          PIC 9(11).
+    36     02 NOME-ENT         PIC X(30).
+    37     02 PONTUACAO-ENT    PIC 9(03).
+    38
+    39
+    40 SD  TRAB.
+    41 01  REG-TRA.
+    42     02 CPF-TRAB          PIC 9(11).
+    43     02 NOME-TRAB         PIC X(30).
+    44     02 PONTUACAO-TRAB    PIC 9(03).
+    45
+    46
+    47
+    48
+    49 FD  CADVEST
+    50     LABEL         RECORD         ARE        STANDARD
+    51     VALUE        OF FILE-ID      IS       "CADVEST.DAT".
+    52
+    53 01   REG-SAI.
+    54      03 CPF-SAI           PIC 9(11).
+    55      03 NOME-SAI          PIC X(30).
+    56      03 PONTUACAO-SAI     PIC 9(03).
+    57
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 10:03 Page   2
+*                                       PGM.CBL
+    58
+    59
+    60
+    61 WORKING-STORAGE SECTION.
+    62
+    63 77    FIM-ARQ          PIC X(03) VALUE "NAO".
+    64
+    65
+    66 PROCEDURE                                   DIVISION.
+    67
+    68 PGM-06.
+    69
+    70         SORT    TRAB
+    71             DESCENDING KEY PONTUACAO-TRAB
+    72             INPUT PROCEDURE ROT-ENTRADA
+    73             GIVING CADVEST.
+    74      STOP RUN.
+    75
+    76 ROT-ENTRADA      SECTION.
+    77     PERFORM INICIO-ENTRADA.
+    78     PERFORM PRINCIPAL-ENTRADA
+    79          UNTIL FIM-ARQ EQUAL "SIM".
+    80     PERFORM FIM-ENTRADA.
+    81
+    82 INICIO-ENTRADA SECTION.
+    83     OPEN INPUT CADENT.
+    84     PERFORM LEITURA-ENTRADA.
+    85
+    86
+    87
+    88 LEITURA-ENTRADA   SECTION.
+    89     READ CADENT
+    90          AT END
+    91          MOVE "SIM"  TO FIM-ARQ.
+    92
+    93 PRINCIPAL-ENTRADA    SECTION.
+    94     PERFORM SELECAO-ENTRADA.
+    95     PERFORM LEITURA-ENTRADA.
+    96
+    97 SELECAO-ENTRADA    SECTION.
+    98     IF PONTUACAO-ENT >= 70
+    99         PERFORM GRAVACAO-ENTRADA.
+   100
+   101 GRAVACAO-ENTRADA SECTION.
+   102     MOVE CPF-ENT          TO CPF-TRAB.
+   103     MOVE NOME-ENT         TO NOME-TRAB.
+   104     MOVE PONTUACAO-ENT    TO PONTUACAO-TRAB.
+   105     RELEASE REG-TRA.
+   106
+   107 FIM-ENTRADA  SECTION.
+   108     CLOSE   CADENT.
+   109
+   110
+   111
+   112
+   113
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 10:03 Page   3
+*                                       PGM.CBL
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1268     Code:         493     Dictionary:        1635

@@ -1,0 +1,226 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 02-Jun-20 14:35 Page   1
+*                                      PGM05.CBL
+* Options: LIST(HD.LST) ASMLIST(DJD.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       PGM05.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     01/06/2020.
+     6 DATE-COMPILED. 02-Jun-20 14:35.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE UM ARQUIVO E IMPRIME UM RELATORIO.
+     9 ENVIRONMENT             DIVISION.
+    10
+    11 CONFIGURATION SECTION.
+    12       SOURCE-COMPUTER. MARIA-PC.
+    13       OBJECT-COMPUTER. MARIA-PC.
+    14       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    15 INPUT-OUTPUT SECTION.
+    16 FILE-CONTROL.
+    17
+    18     SELECT   CADENT           ASSIGN      TO      DISK
+    19     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    20     SELECT   REL-SAI          ASSIGN      TO      DISK.
+    21
+    22 DATA                           DIVISION.
+    23
+    24 FILE SECTION.
+    25 FD  CADENT
+    26     LABEL         RECORD          ARE     STANDARD
+    27     VALUE        OF FILE-ID       IS      "CADENT8.DAT".
+    28
+    29 01  REG-USU.
+    30       02 CPF-USU.
+    31          03 NNN-U        PIC 9(03).
+    32          03 YYY-U        PIC 9(03).
+    33          03 HHH-U        PIC 9(03).
+    34          02 RR-U         PIC 9(02).
+    35       02 NOM-USU       PIC X(30).
+    36       02 ESTADO-USU    PIC X(02).
+    37       02 CIDADE-USU    PIC X(30).
+    38       02 TELEFONE-USU  PIC 9(08).
+    39       02 DATA-USU.
+    40          03 DIA        PIC 9(02).
+    41          03 MES-USU    PIC 9(02).
+    42          03 ANO        PIC 9(04).
+    43
+    44 FD  REL-SAI
+    45     LABEL         RECORD         IS          OMITTED.
+    46
+    47 01  REG-SAI           PIC X(80).
+    48
+    49
+    50 WORKING-STORAGE SECTION.
+    51
+    52
+    53 01  TABELA-MES.
+    54     02 DEF-MES.
+    55        03 FILLER     PIC X(009) VALUE "JANEIRO".
+    56        03 FILLER     PIC X(009) VALUE "FEVEREIRO".
+    57        03 FILLER     PIC X(009) VALUE "MARCO".
+* Microsoft COBOL Version 4.5        L2.4 revision 002 02-Jun-20 14:35 Page   2
+*                                      PGM05.CBL
+    58        03 FILLER     PIC X(009) VALUE "ABRIL".
+    59        03 FILLER     PIC X(009) VALUE "MAIO".
+    60        03 FILLER     PIC X(009) VALUE "JUNHO".
+    61        03 FILLER     PIC X(009) VALUE "JULHO".
+    62        03 FILLER     PIC X(009) VALUE "AGOSTO".
+    63        03 FILLER     PIC X(009) VALUE "SETEMBRO".
+    64        03 FILLER     PIC X(009) VALUE "OUTUBRO".
+    65        03 FILLER     PIC X(009) VALUE "NOVEMBRO".
+    66        03 FILLER     PIC X(009) VALUE "DEZEMBRO".
+    67
+    68 01  TABELA-MES-RED   REDEFINES  TABELA-MES.
+    69      02 MES          PIC X(009)
+    70                      OCCURS 12 TIMES.
+    71
+    72 01  CAB-01.
+    73     02 FILLER         PIC X(70) VALUE SPACES.
+    74     02 FILLER         PIC X(05) VALUE "PAG. ".
+    75     02 VAR-PAG        PIC 9(03).
+    76     02 FILLER         PIC X(02) VALUE SPACES.
+    77
+    78 01  CAB-02.
+    79     02 FILLER         PIC X(30) VALUE SPACES.
+    80     02 FILLER         PIC X(17) VALUE "TURISMAR TURISMO".
+    81     02 FILLER         PIC X(33) VALUE SPACES.
+    82
+    83 01  CAB-03.
+    84     02 FILLER         PIC X(20) VALUE SPACES.
+    85     02 FILLER         PIC X(34) VALUE
+    86                         "CLIENTES NO PERIODO DE 2010 A 2011".
+    87     02 FILLER         PIC X(26) VALUE SPACES.
+    88
+    89 01  CAB-04.
+    90     02 FILLER        PIC X(15) VALUE SPACES.
+    91     02 FILLER        PIC X(04) VALUE "NOME".
+    92     02 FILLER        PIC X(22) VALUE SPACES.
+    93     02 FILLER        PIC X(03) VALUE "CPF".
+    94     02 FILLER        PIC X(07) VALUE SPACES.
+    95     02 FILLER        PIC X(21) VALUE "DATA DA ULTIMA VISITA".
+    96     02 FILLER        PIC X(08) VALUE SPACES.
+    97
+    98 01  CAB-05.
+    99     02 FILLER        PIC X(58) VALUE SPACES.
+   100     02 FILLER        PIC X(14) VALUE "DIA / MES/ ANO".
+   101     02 FILLER        PIC X(08) VALUE SPACES.
+   102
+   103
+   104 01  DETALHE.
+   105     02 FILLER         PIC X(05) VALUE SPACES.
+   106     02 NOM            PIC X(30).
+   107     02 FILLER         PIC X(03) VALUE SPACES.
+   108     02 NNN            PIC 9(03).
+   109     02 FILLER         PIC X(01) VALUE ".".
+   110     02 YYY            PIC 9(03).
+   111     02 FILLER         PIC X(01) VALUE ".".
+   112     02 HHH            PIC 9(03).
+   113     02 FILLER         PIC X(01) VALUE "/".
+   114     02 RR             PIC 9(02).
+   115     02 FILLER         PIC X(03) VALUE SPACES.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 02-Jun-20 14:35 Page   3
+*                                      PGM05.CBL
+   116     02 DDD            PIC 9(02).
+   117     02 FILLER         PIC X(01) VALUE "/".
+   118     02 MMM            PIC X(09).
+   119     02 FILLER         PIC X(01) VALUE "/".
+   120     02 AAA            PIC 9(04).
+   121     02 FILLER         PIC X(08) VALUE SPACES.
+   122
+   123 01  CAB-06.
+   124     02 FILLER         PIC X(05) VALUE SPACES.
+   125     02 FILLER         PIC X(19) VALUE "TOTAL DE CLIENTES: ".
+   126
+   127 77  FIM-ARQ          PIC X(03)             VALUE   "NAO".
+   128 77  CT-LIN           PIC 9(02)             VALUE  40.
+   129 77  CT-PAG           PIC 9(02)             VALUE  ZEROES.
+   130
+   131
+   132
+   133
+   134 PROCEDURE                                   DIVISION.
+   135
+   136 PGM-EX05.
+   137
+   138         PERFORM    INICIO.
+   139
+   140         PERFORM    PRINCIPAL
+   141              UNTIL   FIM-ARQ      EQUAL     "SIM".
+   142
+   143         PERFORM   FIM.
+   144
+   145     STOP RUN.
+   146 INICIO.
+   147
+   148     OPEN INPUT       CADENT
+   149         OUTPUT       REL-SAI.
+   150
+   151     PERFORM       LEITURA.
+   152
+   153
+   154 LEITURA.
+   155
+   156     READ CADENT
+   157              AT END
+   158              MOVE  "SIM"        TO        FIM-ARQ.
+   159 PRINCIPAL.
+   160
+   161     PERFORM             PESQUISA-TABELA.
+   162     PERFORM             SELECAO.
+   163         PERFORM             LEITURA.
+   164
+   165 PESQUISA-TABELA.
+   166     MOVE  MES (MES-USU) TO MMM.
+   167
+   168
+   169
+   170 SELECAO.
+   171     IF ANO EQUAL 2010 OR ANO EQUAL 2011
+   172        PERFORM IMPRESSAO.
+   173
+* Microsoft COBOL Version 4.5        L2.4 revision 002 02-Jun-20 14:35 Page   4
+*                                      PGM05.CBL
+   174
+   175 IMPRESSAO.
+   176     IF CT-LIN GREATER THAN 38
+   177        PERFORM CABECALHO.
+   178     PERFORM IMPDET.
+   179
+   180 IMPDET.
+   181
+   182     MOVE      NOM-USU      TO          NOM.
+   183     MOVE      NNN-U        TO          NNN.
+   184     MOVE      YYY-U        TO          YYY.
+   185     MOVE      HHH-U        TO          HHH.
+   186     MOVE      RR-U         TO          RR.
+   187     MOVE      DIA          TO          DDD.
+   188     MOVE      ANO          TO          AAA.
+   189     WRITE     REG-SAI FROM DETALHE BEFORE ADVANCING 1 LINE.
+   190     ADD       1            TO          CT-LIN.
+   191
+   192
+   193
+   194 CABECALHO.
+   195     ADD       1            TO    CT-PAG.
+   196     MOVE CT-PAG            TO    VAR-PAG.
+   197     WRITE REG-SAI AFTER ADVANCING PAGE.
+   198     WRITE REG-SAI FROM CAB-01 BEFORE ADVANCING 1 LINE.
+   199     WRITE REG-SAI FROM CAB-02 BEFORE ADVANCING 2 LINES.
+   200     WRITE REG-SAI FROM CAB-03 BEFORE ADVANCING 2 LINES.
+   201     WRITE REG-SAI FROM CAB-04 BEFORE ADVANCING 1 LINE.
+   202     WRITE REG-SAI FROM CAB-05 BEFORE ADVANCING 2 LINES.
+   203     MOVE ZEROES TO CT-LIN.
+   204
+   205
+   206
+   207 FIM.
+   208     CLOSE       CADENT
+   209                 REL-SAI.
+   210
+   211
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1768     Code:         672     Dictionary:        2290

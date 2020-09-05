@@ -1,0 +1,187 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Jun-20 21:00 Page   1
+*                                      PGM07.CBL
+* Options: LIST(PGM07.LST) ASMLIST(PGM07.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID. PGM07.
+     3 AUTHOR. MARIA VICTOR.
+     4 INSTALLATION. FATEC-SP.
+     5 DATE-WRITTEN. 22/06/2020.
+     6 DATE-COMPILED. 22-Jun-20 21:00.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.                  LE O ARQUIVO DE ENTRADA E IMPRIME UM.
+     9*                          RELATORIO.
+    10
+    11 ENVIRONMENT DIVISION.
+    12
+    13 CONFIGURATION SECTION.
+    14     SOURCE-COMPUTER. IBM-PC.
+    15     OBJECT-COMPUTER. IBM-PC.
+    16     SPECIAL-NAMES. DECIMAL-POINT IS COMMA.
+    17
+    18 INPUT-OUTPUT SECTION.
+    19 FILE-CONTROL.
+    20     SELECT    CADENT          ASSIGN         TO          DISK
+    21     ORGANIZATION      IS           LINE            SEQUENTIAL.
+    22     SELECT    TRAB            ASSIGN         TO          DISK.
+    23     SELECT    RELTRAN         ASSIGN         TO          DISK.
+    24
+    25 DATA DIVISION.
+    26 FILE SECTION.
+    27
+    28 FD  CADENT
+    29     LABEL RECORD ARE  STANDARD
+    30     VALUE        OF   FILE-ID   IS       "CADENT.DAT".
+    31
+    32 01  REG-ENT.
+    33         02 NOME-ENT       PIC X(30).
+    34         02 DPT-ENT        PIC 9(02).
+    35         02 TRANS-ENT      PIC 9(04)V99.
+    36     02 DIAS-ENT       PIC 99.
+    37
+    38 SD  TRAB.
+    39     01  REG-TRAB.
+    40         02 NOME-TRAB   PIC X(30).
+    41     02 VALOR-TRAB  PIC Z.ZZZ.ZZV99.
+    42
+    43 FD  RELTRAN
+    44         LABEL         RECORD         IS          OMITTED.
+    45
+    46     01  REG-REL           PIC X(80).
+    47
+    48     WORKING-STORAGE SECTION.
+    49
+    50     77  FIM-ARQ            PIC X(03) VALUE "NAO".
+    51     77  CT-LIN             PIC 9(02) VALUE 30.
+    52     77  CT-PAG             PIC 9(02) VALUE ZEROES.
+    53 77  VALORAUX           PIC Z.ZZZ.ZZV99.
+    54
+    55
+    56     01  CAB-01.
+    57         02 FILLER    PIC X(20) VALUE SPACES.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Jun-20 21:00 Page   2
+*                                      PGM07.CBL
+    58     02 FILLER    PIC X(37) VALUE
+    59                  "RELACAO DE VALORES DO TRANSPORTE PAGO".
+    60     02 FILLER    PIC X(13) VALUE SPACES.
+    61         02 FILLER    PIC X(05) VALUE "PAG. ".
+    62         02 VAR-PAG   PIC ZZ9.
+    63         02 FILLER    PIC X(02) VALUE SPACES.
+    64
+    65     01  CAB-02.
+    66         02 FILLER    PIC X(22) VALUE SPACES.
+    67         02 FILLER    PIC X(30) VALUE
+    68                            "PARA TRABALHADOR DO DPTO DE TI".
+    69         02 FILLER    PIC X(28) VALUE SPACES.
+    70
+    71 01  CAB-03.
+    72         02 FILLER    PIC X(05) VALUE SPACES.
+    73         02 FILLER    PIC X(04) VALUE "NOME".
+    74         02 FILLER    PIC X(31) VALUE SPACES.
+    75         02 FILLER    PIC X(10) VALUE "VALOR PAGO".
+    76         02 FILLER    PIC X(30) VALUE SPACES.
+    77
+    78 01  DETALHE.
+    79         02 FILLER     PIC X(01) VALUE SPACES.
+    80         02 NOME-SAI   PIC X(30).
+    81         02 FILLER     PIC X(13) VALUE SPACES.
+    82         02 VALORP     PIC Z.ZZZ.ZZV99.
+    83         02 FILLER     PIC X(30) VALUE SPACES.
+    84
+    85 PROCEDURE DIVISION.
+    86 PGM-EX07.
+    87     SORT TRAB
+    88         ASCENDING KEY NOME-TRAB
+    89         INPUT PROCEDURE ROT-CADENT
+    90         OUTPUT PROCEDURE ROT-RELTRAN.
+    91     STOP RUN.
+    92
+    93 ROT-CADENT SECTION.
+    94         PERFORM INICIO-ENTRADA.
+    95         PERFORM PRINCIPAL-ENTRADA
+    96                      UNTIL
+    97             FIM-ARQ EQUAL "SIM".
+    98         PERFORM FIM-ENTRADA.
+    99
+   100 INICIO-ENTRADA SECTION.
+   101         OPEN INPUT CADENT.
+   102         PERFORM LEITURA-ENTRADA.
+   103
+   104 LEITURA-ENTRADA SECTION.
+   105         READ CADENT
+   106           AT END
+   107         MOVE "SIM" TO FIM-ARQ.
+   108
+   109 PRINCIPAL-ENTRADA SECTION.
+   110         PERFORM SELECAO-ENTRADA.
+   111         PERFORM LEITURA-ENTRADA.
+   112
+   113     SELECAO-ENTRADA SECTION.
+   114         IF DPT-ENT EQUAL 32
+   115         PERFORM GRAVACAO-ENTRADA.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Jun-20 21:00 Page   3
+*                                      PGM07.CBL
+   116
+   117     GRAVACAO-ENTRADA SECTION.
+   118     COMPUTE VALORAUX = ( TRANS-ENT * 2 ) * ( DIAS-ENT ).
+   119         MOVE NOME-ENT TO NOME-TRAB.
+   120         MOVE VALORAUX TO VALOR-TRAB.
+   121         RELEASE REG-TRAB.
+   122
+   123     FIM-ENTRADA SECTION.
+   124         CLOSE CADENT.
+   125
+   126     ROT-RELTRAN SECTION.
+   127         PERFORM INICIO-SAIDA.
+   128         PERFORM PRINCIPAL-SAIDA
+   129               UNTIL
+   130         FIM-ARQ EQUAL "SIM".
+   131         PERFORM FIM-SAIDA.
+   132
+   133     INICIO-SAIDA SECTION.
+   134         MOVE "NAO" TO FIM-ARQ.
+   135         OPEN OUTPUT RELTRAN.
+   136         PERFORM LE-SAIDA.
+   137
+   138     LE-SAIDA SECTION.
+   139         RETURN TRAB
+   140            AT END
+   141         MOVE "SIM" TO FIM-ARQ.
+   142
+   143     PRINCIPAL-SAIDA SECTION.
+   144     PERFORM IMPRESSAO-SAIDA.
+   145         PERFORM LE-SAIDA.
+   146
+   147     IMPRESSAO-SAIDA SECTION.
+   148         IF CT-LIN GREATER THAN 29
+   149            PERFORM CABECALHO-SAIDA.
+   150         PERFORM DETALHE-SAIDA.
+   151
+   152     CABECALHO-SAIDA SECTION.
+   153             ADD 1           TO CT-PAG.
+   154             MOVE CT-PAG     TO VAR-PAG.
+   155             WRITE REG-REL
+   156             AFTER ADVANCING PAGE.
+   157             WRITE REG-REL FROM CAB-01 AFTER ADVANCING 2 LINE.
+   158             WRITE REG-REL FROM CAB-02 AFTER ADVANCING 1 LINE.
+   159             WRITE REG-REL FROM CAB-03 AFTER ADVANCING 3 LINES.
+   160             MOVE ZEROES     TO CT-LIN.
+   161
+   162     DETALHE-SAIDA SECTION.
+   163             MOVE NOME-TRAB  TO NOME-SAI.
+   164             MOVE VALOR-TRAB TO VALORP.
+   165             WRITE REG-REL FROM DETALHE AFTER ADVANCING 1 LINE.
+   166             ADD 1           TO CT-LIN.
+   167
+   168     FIM-SAIDA SECTION.
+   169             CLOSE RELTRAN.
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Jun-20 21:00 Page   4
+*                                      PGM07.CBL
+* Total Messages:     0
+* Unrecoverable :     0                    Severe  :     0
+* Errors        :     0                    Warnings:     0
+* Informational :     0                    Flags   :     0
+* Data:        1664     Code:         978     Dictionary:        2452

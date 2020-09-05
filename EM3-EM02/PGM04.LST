@@ -1,0 +1,129 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 16-Jun-20 19:50 Page   1
+*                                      PGM04.CBL
+* Options: LIST(PGM04.LST) ASMLIST(PGM04.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       PGM04.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     09/06/2020.
+     6 DATE-COMPILED. 16-Jun-20 19:50.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE OS REGISTRO DO ARQUIVO DE
+     9*          ENTRADA CADENT, CALCULAR O SALARIO E GRAVAR NO
+    10*          ARQUIVO DE SAIDA CADSAI POR ORDEM ASCENDENTE POR NOME.
+    11
+    12 ENVIRONMENT             DIVISION.
+    13
+    14 CONFIGURATION SECTION.
+    15       SOURCE-COMPUTER. MARIA-PC.
+    16       OBJECT-COMPUTER. MARIA-PC.
+    17       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    18 INPUT-OUTPUT SECTION.
+    19 FILE-CONTROL.
+    20
+    21     SELECT   CADENT       ASSIGN      TO      DISK
+    22     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    23     SELECT   TRAB          ASSIGN      TO      DISK.
+    24
+    25     SELECT   CADSAI           ASSIGN      TO      DISK
+    26     ORGANIZATION    IS         LINE          SEQUENTIAL.
+    27 DATA                           DIVISION.
+    28
+    29 FILE SECTION.
+    30 FD  CADENT
+    31     LABEL         RECORD          ARE     STANDARD
+    32     VALUE        OF FILE-ID       IS      "CADENT.DAT".
+    33
+    34 01  REG-ENT.
+    35     02 NOME-ENT      PIC X(30).
+    36     02 HORAS-ENT     PIC 9(03).
+    37     02 VALORH-ENT    PIC 9(02)V99.
+    38     02 DESPESAS-ENT  PIC 9(03)V99.
+    39     02 IMPOSTOS-ENT  PIC 9(03)V99.
+    40
+    41 SD  TRAB.
+    42 01  REG-TRA.
+    43     02 NOME-TRAB       PIC X(30).
+    44     02 HORAS-TRAB      PIC 9(03).
+    45     02 VALORH-TRAB     PIC 9(02)V99.
+    46     02 DESPESAS-TRAB   PIC 9(03)V99.
+    47     02 IMPOSTOS-TRAB   PIC 9(03)V99.
+    48
+    49
+    50 FD  CADSAI
+    51     LABEL         RECORD         ARE        STANDARD
+    52     VALUE        OF FILE-ID      IS       "CADSAI.DAT".
+    53
+    54 01   REG-SAI.
+    55      03 NOME-SAI         PIC X(30).
+    56      03 SALARIOL-SAI     PIC 9(05)V99.
+    57
+* Microsoft COBOL Version 4.5        L2.4 revision 002 16-Jun-20 19:50 Page   2
+*                                      PGM04.CBL
+    58
+    59 WORKING-STORAGE SECTION.
+    60
+    61 77     FIM-ARQ         PIC X(03) VALUE  "NAO".
+    62 77     WR-SALARIO      PIC 9(05)V99 VALUE ZERO.
+    63 77     VAR-SALARIO     PIC 9(05)V99 VALUE ZERO.
+    64
+    65
+    66 PROCEDURE                                   DIVISION.
+    67
+    68 PGM-EXE04.
+    69
+    70         SORT    TRAB
+    71             ASCENDING KEY NOME-TRAB
+    72             USING CADENT
+    73             OUTPUT PROCEDURE ROT-SAIDA
+    74      STOP RUN.
+    75
+    76 ROT-SAIDA              SECTION.
+    77     PERFORM   INICIO.
+    78     PERFORM   PRINCIPAL
+    79              UNTIL FIM-ARQ EQUAL "SIM".
+    80     PERFORM FIM.
+    81
+    82
+    83 INICIO                 SECTION.
+    84     OPEN    OUTPUT CADSAI.
+    85     PERFORM LE-SORT.
+    86
+    87
+    88 LE-SORT                SECTION.
+    89     RETURN  TRAB
+    90             AT END
+    91             MOVE "SIM"  TO   FIM-ARQ.
+    92
+    93
+    94 PRINCIPAL              SECTION.
+    95      PERFORM  CALCULO.
+    96      PERFORM GRAVACAO.
+    97      PERFORM  LE-SORT.
+    98
+    99
+   100
+   101 CALCULO                 SECTION.
+   102     MULTIPLY HORAS-TRAB BY VALORH-TRAB GIVING WR-SALARIO.
+   103     SUBTRACT DESPESAS-TRAB IMPOSTOS-TRAB FROM WR-SALARIO GIVING
+   104                                          VAR-SALARIO.
+   105
+   106
+   107
+   108 GRAVACAO                SECTION.
+   109     MOVE NOME-TRAB   TO  NOME-SAI.
+   110     MOVE VAR-SALARIO TO  SALARIOL-SAI.
+   111     WRITE REG-SAI.
+   112
+   113
+   114 FIM                      SECTION.
+   115     CLOSE  CADSAI.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 16-Jun-20 19:50 Page   3
+*                                      PGM04.CBL
+   116
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1304     Code:         525     Dictionary:        1817

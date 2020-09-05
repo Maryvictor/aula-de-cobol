@@ -1,0 +1,233 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 16-Jun-20 09:41 Page   1
+*                                       PGMX.CBL
+* Options: LIST(PGMX.LST) ASMLIST(PGMX.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       PGM03.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     14/06/2020.
+     6 DATE-COMPILED. 16-Jun-20 09:41.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE UM ARQUIVO E IMPRIME UM RELATORIO.
+     9 ENVIRONMENT             DIVISION.
+    10
+    11 CONFIGURATION SECTION.
+    12       SOURCE-COMPUTER. MARIA-PC.
+    13       OBJECT-COMPUTER. MARIA-PC.
+    14       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    15 INPUT-OUTPUT SECTION.
+    16 FILE-CONTROL.
+    17
+    18     SELECT   CADENT           ASSIGN      TO      DISK
+    19     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    20     SELECT   TRAB             ASSIGN      TO      DISK.
+    21     SELECT   RELCURA          ASSIGN      TO      DISK.
+    22
+    23 DATA                           DIVISION.
+    24
+    25 FILE SECTION.
+    26 FD  CADENT
+    27     LABEL         RECORD          ARE     STANDARD
+    28     VALUE        OF FILE-ID       IS      "CADENT1.DAT".
+    29
+    30 01  REG-ENT.
+    31       02 ESTADO-ENT       PIC X(02).
+    32       02 CIDADE-ENT       PIC X(30).
+    33       02 DATA-ENT.
+    34          03 DIA-ENT       PIC 9(02).
+    35          03 MES-ENT       PIC 9(02).
+    36          03 ANO-ENT       PIC 9(04).
+    37       02 CASOS-ENT        PIC 9(05).
+    38       02 CURADOS-ENT      PIC 9(05).
+    39
+    40 SD  TRAB.
+    41 01  REG-TRAB.
+    42       02 ESTADO-TRAB       PIC X(02).
+    43       02 CIDADE-TRAB       PIC X(30).
+    44       02 DATA-TRAB.
+    45          03 DIA-TRAB       PIC 9(02).
+    46          03 MES-TRAB       PIC 9(02).
+    47          03 ANO-TRAB       PIC 9(04).
+    48       02 CASOS-TRAB        PIC 9(05).
+    49       02 CURADOS-TRAB      PIC 9(05).
+    50
+    51
+    52
+    53 FD  RELCURA
+    54     LABEL         RECORD         IS          OMITTED.
+    55
+    56 01  REG-REL           PIC X(80).
+    57
+* Microsoft COBOL Version 4.5        L2.4 revision 002 16-Jun-20 09:41 Page   2
+*                                       PGMX.CBL
+    58
+    59 WORKING-STORAGE SECTION.
+    60
+    61 77  FIM-ARQ          PIC X(03)             VALUE   "NAO".
+    62 77  CT-LIN           PIC 9(02)             VALUE  20.
+    63 77  CT-PAG           PIC 9(02)             VALUE  ZEROES.
+    64 77  VAR-CID          PIC X(30)             VALUE SPACES.
+    65 77  VAR-EST          PIC X(02)             VALUE SPACES.
+    66
+    67 01  CAB-01.
+    68     02 FILLER         PIC X(15) VALUE SPACES.
+    69     02 FILLER         PIC X(44)   VALUE
+    70                   "RELACAO DE PESSOAS CURADAS POR ESTADO/CIDADE".
+    71     02 FILLER         PIC X(11) VALUE SPACES.
+    72     02 FILLER         PIC X(05) VALUE "PAG. ".
+    73     02 VAR-PAG        PIC 9(03).
+    74     02 FILLER         PIC X(02) VALUE SPACES.
+    75
+    76 01  CAB-02.
+    77     02 FILLER         PIC X(05) VALUE SPACES.
+    78     02 FILLER         PIC X(08) VALUE "ESTADO: ".
+    79     02 EST            PIC X(02).
+    80     02 FILLER         PIC X(65) VALUE SPACES.
+    81
+    82 01  CAB-03.
+    83     02 FILLER         PIC X(10) VALUE SPACES.
+    84     02 FILLER         PIC X(08) VALUE "CIDADE: ".
+    85     02 CID            PIC X(30).
+    86     02 FILLER         PIC X(32) VALUE SPACES.
+    87
+    88 01  CAB-04.
+    89     02 FILLER         PIC X(05) VALUE SPACES.
+    90     02 FILLER         PIC X(04) VALUE "DATA".
+    91     02 FILLER         PIC X(15) VALUE SPACES.
+    92     02 FILLER         PIC X(17) VALUE "CASOS CONFIRMADOS".
+    93     02 FILLER         PIC X(15) VALUE  SPACES.
+    94     02 FILLER         PIC X(15) VALUE "PESSOAS CURADAS".
+    95     02 FILLER         PIC X(09) VALUE SPACES.
+    96
+    97 01  DETALHE.
+    98     02 FILLER         PIC X(06) VALUE SPACES.
+    99     02 DDD            PIC 9(02).
+   100     02 FILLER         PIC X(01) VALUE "/".
+   101     02 MMM            PIC 9(02).
+   102     02 FILLER         PIC X(01) VALUE "/".
+   103     02 AAA            PIC 9(04).
+   104     02 FILLER         PIC X(20) VALUE SPACES.
+   105     02 CASOS            PIC 9(05).
+   106     02 FILLER         PIC X(20) VALUE SPACES.
+   107     02 CURADOS            PIC 9(05).
+   108     02 FILLER         PIC X(14) VALUE SPACES.
+   109
+   110 PROCEDURE                                   DIVISION.
+   111
+   112     SORT TRAB
+   113          ASCENDING KEY ESTADO-TRAB
+   114          ASCENDING KEY CIDADE-TRAB
+   115          INPUT  PROCEDURE ROT-ENTRADA
+* Microsoft COBOL Version 4.5        L2.4 revision 002 16-Jun-20 09:41 Page   3
+*                                       PGMX.CBL
+   116          OUTPUT PROCEDURE ROT-SAIDA.
+   117     STOP RUN.
+   118
+   119 ROT-ENTRADA   SECTION.
+   120     PERFORM INICIO-ENTRADA.
+   121     PERFORM PRINCIPAL-ENTRADA
+   122             UNTIL
+   123             FIM-ARQ EQUAL "SIM".
+   124     PERFORM FIM-ENTRADA.
+   125
+   126 INICIO-ENTRADA SECTION.
+   127     OPEN INPUT CADENT
+   128     PERFORM LEITURA-ENTRADA.
+   129
+   130 LEITURA-ENTRADA SECTION.
+   131     READ CADENT
+   132          AT END
+   133          MOVE "SIM" TO FIM-ARQ.
+   134
+   135 PRINCIPAL-ENTRADA SECTION.
+   136     PERFORM GRAVACAO-ENTRADA.
+   137     PERFORM LEITURA-ENTRADA.
+   138
+   139 GRAVACAO-ENTRADA SECTION.
+   140     MOVE ESTADO-ENT TO ESTADO-TRAB.
+   141     MOVE CIDADE-ENT TO CIDADE-TRAB.
+   142     MOVE DIA-ENT    TO DIA-TRAB.
+   143     MOVE MES-ENT    TO MES-TRAB.
+   144     MOVE ANO-ENT    TO ANO-TRAB.
+   145     MOVE CASOS-ENT  TO CASOS-TRAB.
+   146     MOVE CURADOS-ENT TO CURADOS-TRAB.
+   147     RELEASE REG-TRAB.
+   148
+   149 FIM-ENTRADA SECTION.
+   150     CLOSE CADENT.
+   151
+   152
+   153 ROT-SAIDA SECTION.
+   154     PERFORM INICIO-SAIDA.
+   155     PERFORM PRINCIPAL-SAIDA
+   156             UNTIL
+   157             FIM-ARQ EQUAL "SIM".
+   158     PERFORM FIM-SAIDA.
+   159
+   160 INICIO-SAIDA SECTION.
+   161     MOVE "NAO" TO FIM-ARQ.
+   162     OPEN  OUTPUT RELCURA.
+   163     PERFORM LE-SAIDA.
+   164
+   165 LE-SAIDA SECTION.
+   166     RETURN TRAB
+   167            AT END
+   168            MOVE "SIM" TO FIM-ARQ.
+   169
+   170 PRINCIPAL-SAIDA SECTION.
+   171     PERFORM IMPRESSAO-SAIDA.
+   172     PERFORM LE-SAIDA.
+   173
+* Microsoft COBOL Version 4.5        L2.4 revision 002 16-Jun-20 09:41 Page   4
+*                                       PGMX.CBL
+   174 IMPRESSAO-SAIDA SECTION.
+   175     IF CT-LIN GREATER THAN 19
+   176        PERFORM CABECALHO-SAIDA.
+   177     IF (VAR-CID <> CIDADE-TRAB)
+   178               OR
+   179             (VAR-EST <> ESTADO-TRAB)
+   180         PERFORM CABECALHO-SAIDA.
+   181     PERFORM DETALHE-SAIDA.
+   182
+   183
+   184
+   185
+   186
+   187
+   188 DETALHE-SAIDA SECTION.
+   189
+   190     MOVE      DIA-TRAB    TO         DDD.
+   191     MOVE      MES-TRAB    TO         MMM.
+   192     MOVE      ANO-TRAB    TO         AAA.
+   193     MOVE      CASOS-TRAB  TO         CASOS.
+   194     MOVE      CURADOS-TRAB TO        CURADOS.
+   195     WRITE     REG-REL FROM DETALHE AFTER ADVANCING 1 LINE.
+   196     ADD       1            TO          CT-LIN.
+   197
+   198 CABECALHO-SAIDA SECTION.
+   199     ADD       1            TO    CT-PAG.
+   200     MOVE CT-PAG            TO    VAR-PAG.
+   201     MOVE ESTADO-TRAB       TO    EST.
+   202     MOVE CIDADE-TRAB       TO    CID.
+   203     WRITE REG-REL AFTER ADVANCING PAGE.
+   204     WRITE REG-REL FROM CAB-01 AFTER ADVANCING 1 LINE.
+   205     WRITE REG-REL FROM CAB-02 AFTER ADVANCING 2 LINES.
+   206     WRITE REG-REL FROM CAB-03 AFTER ADVANCING 2 LINES.
+   207     WRITE REG-REL FROM CAB-04 AFTER ADVANCING 2 LINES.
+   208     WRITE REG-REL
+   209     MOVE ZEROES TO CT-LIN.
+   210     MOVE CIDADE-TRAB               TO    VAR-CID.
+   211     MOVE ESTADO-TRAB              TO    VAR-EST.
+   212
+   213
+   214
+   215 FIM-SAIDA SECTION.
+   216     CLOSE       RELCURA.
+   217
+   218
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1792     Code:        1066     Dictionary:        2894

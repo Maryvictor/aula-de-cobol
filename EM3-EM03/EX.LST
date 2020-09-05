@@ -1,0 +1,123 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 08:47 Page   1
+*                                        EX.CBL
+* Options: LIST(EX.LST) ASMLIST(EX.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       EXE.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     02/06/2020.
+     6 DATE-COMPILED. 09-Jun-20 08:47.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE OS REGISTRO DO ARQUIVO DE
+     9*          ENTRADA CADENT, ORDENA POR PELO NOME DO LIVRO
+    10*          (USANDO SORTE) E GRAVA NO ARQUIVO DE SAIDA CADLIVRO.
+    11
+    12 ENVIRONMENT             DIVISION.
+    13
+    14 CONFIGURATION SECTION.
+    15       SOURCE-COMPUTER. MARIA-PC.
+    16       OBJECT-COMPUTER. MARIA-PC.
+    17       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    18 INPUT-OUTPUT SECTION.
+    19 FILE-CONTROL.
+    20
+    21     SELECT   ENTRADA       ASSIGN      TO      DISK
+    22     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    23     SELECT   TRAB          ASSIGN      TO      DISK.
+    24
+    25     SELECT   SAIDA           ASSIGN      TO      DISK
+    26     ORGANIZATION    IS         LINE          SEQUENTIAL.
+    27 DATA                           DIVISION.
+    28
+    29 FILE SECTION.
+    30 FD  ENTRADA
+    31     LABEL         RECORD          ARE     STANDARD
+    32     VALUE        OF FILE-ID       IS      "ENT.DAT".
+    33
+    34 01  REG-ENT.
+    35     02 COD-ENT       PIC 9(04).
+    36     02 SEXO-ENT      PIC X(01).
+    37     02 NOME-ENT      PIC X(30).
+    38
+    39 SD  TRAB.
+    40 01  REG-TRA.
+    41     02 COD-TRAB       PIC 9(04).
+    42     02 SEXO-TRAB      PIC X(01).
+    43     02 NOME-TRAB      PIC X(30).
+    44
+    45
+    46
+    47 FD  SAIDA
+    48     LABEL         RECORD         ARE        STANDARD
+    49     VALUE        OF FILE-ID      IS       "SAI.DAT".
+    50
+    51 01   REG-SAI.
+    52      03 COD-SAI       PIC 9(05).
+    53      03 SEXO-SAI      PIC X(01).
+    54      03 NOME-SAI      PIC X(30).
+    55
+    56
+    57
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 08:47 Page   2
+*                                        EX.CBL
+    58 WORKING-STORAGE SECTION.
+    59
+    60 77    FIM-ARQ          PIC X(03) VALUE "NAO".
+    61
+    62
+    63 PROCEDURE                                   DIVISION.
+    64
+    65 PGM-EXE.
+    66
+    67         SORT    TRAB
+    68             ASCENDING KEY COD-TRAB
+    69             INPUT PROCEDURE ROT-ENTRADA
+    70             GIVING SAIDA.
+    71      STOP RUN.
+    72
+    73 ROT-ENTRADA      SECTION.
+    74     PERFORM INICIO-ENTRADA.
+    75     PERFORM PRINCIPAL-ENTRADA
+    76          UNTIL FIM-ARQ EQUAL "SIM".
+    77     PERFORM FIM-ENTRADA.
+    78
+    79 INICIO-ENTRADA SECTION.
+    80     OPEN INPUT ENTRADA.
+    81     PERFORM LEITURA-ENTRADA.
+    82
+    83
+    84
+    85 LEITURA-ENTRADA   SECTION.
+    86     READ ENTRADA
+    87          AT END
+    88          MOVE "SIM"  TO FIM-ARQ.
+    89
+    90 PRINCIPAL-ENTRADA    SECTION.
+    91     PERFORM SELECAO-ENTRADA.
+    92     PERFORM LEITURA-ENTRADA.
+    93
+    94 SELECAO-ENTRADA    SECTION.
+    95     IF SEXO-ENT EQUAL "M"
+    96         PERFORM GRAVACAO-ENTRADA.
+    97
+    98 GRAVACAO-ENTRADA SECTION.
+    99     MOVE COD-ENT TO COD-TRAB.
+   100     MOVE SEXO-ENT TO SEXO-TRAB.
+   101     MOVE NOME-ENT TO NOME-TRAB.
+   102     RELEASE REG-TRA.
+   103
+   104 FIM-ENTRADA  SECTION.
+   105     CLOSE   ENTRADA.
+   106
+   107
+   108
+   109
+   110
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 08:47 Page   3
+*                                        EX.CBL
+* Data:        1244     Code:         488     Dictionary:        1612

@@ -1,0 +1,234 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Jun-20 21:03 Page   1
+*                                      PGM08.CBL
+* Options: LIST(PGM08.LST) ASMLIST(PGM08.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       PGM08.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     20/06/2020.
+     6 DATE-COMPILED. 22-Jun-20 21:03.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE UM ARQUIVO E IMPRIME UM RELATORIO.
+     9 ENVIRONMENT             DIVISION.
+    10
+    11 CONFIGURATION SECTION.
+    12       SOURCE-COMPUTER. MARIA-PC.
+    13       OBJECT-COMPUTER. MARIA-PC.
+    14       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    15 INPUT-OUTPUT SECTION.
+    16 FILE-CONTROL.
+    17
+    18     SELECT   CADALU           ASSIGN      TO      DISK
+    19     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    20     SELECT   TRAB             ASSIGN      TO      DISK.
+    21     SELECT   RELALU           ASSIGN      TO      DISK.
+    22
+    23 DATA                           DIVISION.
+    24
+    25 FILE SECTION.
+    26 FD  CADALU
+    27     LABEL         RECORD          ARE     STANDARD
+    28     VALUE        OF FILE-ID       IS      "CADALU.DAT".
+    29
+    30 01  REG-ENT.
+    31       02 COD-ENT         PIC 9(02).
+    32       02 CURSO-ENT       PIC X(30).
+    33       02 DISCIPLINA-ENT  PIC X(30).
+    34       02 MATRICULA.
+    35          03 MATRI-ENT    PIC X(08).
+    36          03 MATRIC-ENT   PIC X(01).
+    37
+    38       02 NOME-ENT        PIC X(30).
+    39       02 EMAIL-ENT       PIC X(20).
+    40
+    41 SD  TRAB.
+    42 01  REG-TRAB.
+    43       02 COD-TRAB         PIC 9(02).
+    44       02 CURSO-TRAB       PIC X(30).
+    45       02 DISCIPLINA-TRAB  PIC X(30).
+    46       02 MATRICULA-TRAB.
+    47          03 MATRI-TRAB    PIC X(08).
+    48          03 MATRIC-TRAB   PIC X(01).
+    49       02 NOME-TRAB        PIC X(30).
+    50       02 EMAIL-TRAB       PIC X(20).
+    51
+    52
+    53
+    54 FD  RELALU
+    55     LABEL         RECORD         IS          OMITTED.
+    56
+    57 01  REG-REL           PIC X(80).
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Jun-20 21:03 Page   2
+*                                      PGM08.CBL
+    58
+    59
+    60 WORKING-STORAGE SECTION.
+    61
+    62 77  FIM-ARQ          PIC X(03)             VALUE   "NAO".
+    63 77  CT-LIN           PIC 9(02)             VALUE  40.
+    64 77  CT-PAG           PIC 9(02)             VALUE  ZEROES.
+    65 77  WR-CURSO         PIC X(30).
+    66 77  WR-DISCIPLINA      PIC X(30).
+    67
+    68 01  CAB-01.
+    69     02 FILLER         PIC X(20) VALUE SPACES.
+    70     02 FILLER         PIC X(27) VALUE
+    71                       "LISTA DE ALUNOS DA FATEC-SP".
+    72     02 FILLER         PIC X(23) VALUE SPACES.
+    73     02 FILLER         PIC X(05) VALUE "PAG. ".
+    74     02 VAR-PAG        PIC ZZ9.
+    75     02 FILLER         PIC X(03) VALUE SPACES.
+    76
+    77 01  CAB-02.
+    78     02 FILLER         PIC X(03) VALUE SPACES.
+    79     02 FILLER         PIC X(07) VALUE "CURSO: ".
+    80     02 CURSO          PIC X(30).
+    81     02 FILLER         PIC X(40) VALUE SPACES.
+    82
+    83 01  CAB-03.
+    84     02 FILLER         PIC X(10) VALUE SPACES.
+    85     02 FILLER         PIC X(12) VALUE "DISCIPLINA: ".
+    86     02 DISCIPLINA     PIC X(30).
+    87     02 FILLER         PIC X(28) VALUE SPACES.
+    88
+    89
+    90 01  CAB-04.
+    91     02 FILLER         PIC X(03) VALUE SPACES.
+    92     02 FILLER         PIC X(09) VALUE "MATRICULA".
+    93     02 FILLER         PIC X(20) VALUE SPACES.
+    94     02 FILLER         PIC X(04) VALUE "NOME".
+    95     02 FILLER         PIC X(20) VALUE SPACES.
+    96     02 FILLER         PIC X(05) VALUE "EMAIL".
+    97     02 FILLER         PIC X(19) VALUE SPACES.
+    98
+    99
+   100 01  DETALHE.
+   101     02 FILLER         PIC X(03) VALUE SPACES.
+   102     02 MATRI-DET      PIC 9(08).
+   103     02 FILLER         PIC X(01) VALUE "-".
+   104     02 MATRIC-DET     PIC 9(01).
+   105     02 FILLER         PIC X(02) VALUE SPACES.
+   106     02 NOME-DET       PIC X(30).
+   107     02 FILLER         PIC X(03) VALUE SPACES.
+   108     02 EMAIL-DET      PIC X(30).
+   109     02 FILLER         PIC X(02) VALUE SPACES.
+   110
+   111 PROCEDURE                                   DIVISION.
+   112
+   113 PGM-EX.
+   114
+   115     SORT TRAB
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Jun-20 21:03 Page   3
+*                                      PGM08.CBL
+   116          ASCENDING KEY CURSO-TRAB
+   117          ASCENDING KEY DISCIPLINA-TRAB
+   118          ASCENDING KEY NOME-TRAB
+   119          INPUT  PROCEDURE ROT-ENTRADA
+   120          OUTPUT PROCEDURE ROT-SAIDA.
+   121     STOP RUN.
+   122
+   123 ROT-ENTRADA   SECTION.
+   124     PERFORM INICIO-ENTRADA.
+   125     PERFORM PRINCIPAL-ENTRADA
+   126             UNTIL
+   127             FIM-ARQ EQUAL "SIM".
+   128     PERFORM FIM-ENTRADA.
+   129
+   130 INICIO-ENTRADA SECTION.
+   131     OPEN INPUT CADALU
+   132     PERFORM LEITURA-ENTRADA.
+   133
+   134 LEITURA-ENTRADA SECTION.
+   135     READ CADALU
+   136          AT END
+   137          MOVE "SIM" TO FIM-ARQ.
+   138
+   139 PRINCIPAL-ENTRADA SECTION.
+   140     PERFORM SELECAO-ENTRADA.
+   141     PERFORM LEITURA-ENTRADA.
+   142
+   143 SELECAO-ENTRADA SECTION.
+   144     IF COD-ENT EQUAL 02
+   145         PERFORM GRAVACAO-ENTRADA.
+   146
+   147 GRAVACAO-ENTRADA SECTION.
+   148     MOVE COD-ENT        TO COD-TRAB.
+   149     MOVE CURSO-ENT      TO CURSO-TRAB.
+   150     MOVE DISCIPLINA-ENT TO DISCIPLINA-TRAB.
+   151     MOVE MATRI-ENT      TO MATRI-TRAB.
+   152     MOVE MATRIC-ENT     TO MATRIC-TRAB.
+   153     MOVE NOME-ENT       TO NOME-TRAB.
+   154     MOVE EMAIL-ENT      TO EMAIL-TRAB.
+   155     RELEASE REG-TRAB.
+   156
+   157 FIM-ENTRADA SECTION.
+   158     CLOSE CADALU.
+   159
+   160
+   161 ROT-SAIDA SECTION.
+   162     PERFORM INICIO-SAIDA.
+   163     PERFORM PRINCIPAL-SAIDA
+   164             UNTIL
+   165             FIM-ARQ EQUAL "SIM".
+   166     PERFORM FIM-SAIDA.
+   167
+   168 INICIO-SAIDA SECTION.
+   169     MOVE "NAO" TO FIM-ARQ.
+   170     OPEN  OUTPUT RELALU.
+   171     PERFORM LE-SAIDA.
+   172
+   173 LE-SAIDA SECTION.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Jun-20 21:03 Page   4
+*                                      PGM08.CBL
+   174     RETURN TRAB
+   175            AT END
+   176            MOVE "SIM" TO FIM-ARQ.
+   177
+   178 PRINCIPAL-SAIDA SECTION.
+   179     PERFORM IMPRESSAO-SAIDA.
+   180     PERFORM LE-SAIDA.
+   181
+   182 IMPRESSAO-SAIDA SECTION.
+   183     IF CT-LIN GREATER THAN 39
+   184                    OR
+   185        (WR-CURSO <> CURSO-TRAB)
+   186                    OR
+   187        (WR-DISCIPLINA <> DISCIPLINA-TRAB)
+   188         PERFORM CABECALHO-SAIDA.
+   189     PERFORM DETALHE-SAIDA.
+   190
+   191 DETALHE-SAIDA SECTION.
+   192
+   193
+   194     MOVE      MATRI-TRAB   TO         MATRI-DET
+   195     MOVE      MATRIC-TRAB  TO         MATRIC-DET.
+   196     MOVE      NOME-TRAB    TO         NOME-DET.
+   197     MOVE      EMAIL-TRAB   TO         EMAIL-DET.
+   198     WRITE     REG-REL FROM DETALHE AFTER ADVANCING 1 LINE.
+   199     ADD       1            TO          CT-LIN.
+   200
+   201 CABECALHO-SAIDA SECTION.
+   202     ADD       1            TO    CT-PAG.
+   203     MOVE CT-PAG            TO    VAR-PAG.
+   204     WRITE REG-REL FROM CAB-01 AFTER ADVANCING 2 LINE.
+   205     MOVE  CURSO-TRAB       TO    CURSO.
+   206     MOVE  DISCIPLINA-TRAB  TO    DISCIPLINA.
+   207     MOVE  CURSO-TRAB       TO    WR-CURSO.
+   208     MOVE  DISCIPLINA-TRAB  TO    WR-DISCIPLINA.
+   209     WRITE REG-REL FROM CAB-02 AFTER ADVANCING 3 LINES.
+   210     WRITE REG-REL FROM CAB-03 AFTER ADVANCING 2 LINES.
+   211     WRITE REG-REL FROM CAB-04 AFTER ADVANCING 3 LINES.
+   212     MOVE ZEROES TO CT-LIN.
+   213
+   214
+   215
+   216 FIM-SAIDA SECTION.
+   217     CLOSE       RELALU.
+   218
+   219
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1976     Code:        1040     Dictionary:        2977

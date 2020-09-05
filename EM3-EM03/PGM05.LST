@@ -1,0 +1,123 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 09:15 Page   1
+*                                      PGM05.CBL
+* Options: LIST(PGM05.LST) ASMLIST(PGM05.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       PGM05.
+     3 AUTHOR.           MARIA VICTOR.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     09/06/2020.
+     6 DATE-COMPILED. 09-Jun-20 09:15.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8*REMARKS.  LE OS REGISTRO DO ARQUIVO DE
+     9*          ENTRADA CADENT, E GRAVA OS REGISTROS DE PESSOAS COM
+    10*          IDADE MAIOR OU IGUAL QUE 18 ANOS NO CADFESTA.
+    11
+    12 ENVIRONMENT             DIVISION.
+    13
+    14 CONFIGURATION SECTION.
+    15       SOURCE-COMPUTER. MARIA-PC.
+    16       OBJECT-COMPUTER. MARIA-PC.
+    17       SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    18 INPUT-OUTPUT SECTION.
+    19 FILE-CONTROL.
+    20
+    21     SELECT   CADENT       ASSIGN      TO      DISK
+    22     ORGANIZATION   IS           LINE         SEQUENTIAL.
+    23     SELECT   TRAB          ASSIGN      TO      DISK.
+    24
+    25     SELECT   CADFESTA           ASSIGN      TO      DISK
+    26     ORGANIZATION    IS         LINE          SEQUENTIAL.
+    27 DATA                           DIVISION.
+    28
+    29 FILE SECTION.
+    30 FD  CADENT
+    31     LABEL         RECORD          ARE     STANDARD
+    32     VALUE        OF FILE-ID       IS      "CADENT.DAT".
+    33
+    34 01  REG-ENT.
+    35     02 NOME-ENT      PIC X(30).
+    36     02 IDADE-ENT     PIC 9(02).
+    37     02 RG-ENT        PIC X(10).
+    38
+    39 SD  TRAB.
+    40 01  REG-TRA.
+    41     02 NOME-TRAB      PIC X(30).
+    42     02 IDADE-TRAB     PIC 9(02).
+    43     02 RG-TRAB        PIC X(10).
+    44
+    45
+    46
+    47 FD  CADFESTA
+    48     LABEL         RECORD         ARE        STANDARD
+    49     VALUE        OF FILE-ID      IS       "CADFESTA.DAT".
+    50
+    51 01   REG-SAI.
+    52      03 NOME-SAI      PIC X(30).
+    53      03 IDADE-SAI     PIC 9(02).
+    54      03 RG-SAI        PIC X(10).
+    55
+    56
+    57
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 09:15 Page   2
+*                                      PGM05.CBL
+    58 WORKING-STORAGE SECTION.
+    59
+    60 77    FIM-ARQ          PIC X(03) VALUE "NAO".
+    61
+    62
+    63 PROCEDURE                                   DIVISION.
+    64
+    65 PGM-05.
+    66
+    67         SORT    TRAB
+    68             ASCENDING KEY NOME-TRAB
+    69             INPUT PROCEDURE ROT-ENTRADA
+    70             GIVING CADFESTA.
+    71      STOP RUN.
+    72
+    73 ROT-ENTRADA      SECTION.
+    74     PERFORM INICIO-ENTRADA.
+    75     PERFORM PRINCIPAL-ENTRADA
+    76          UNTIL FIM-ARQ EQUAL "SIM".
+    77     PERFORM FIM-ENTRADA.
+    78
+    79 INICIO-ENTRADA SECTION.
+    80     OPEN INPUT CADENT.
+    81     PERFORM LEITURA-ENTRADA.
+    82
+    83
+    84
+    85 LEITURA-ENTRADA   SECTION.
+    86     READ CADENT
+    87          AT END
+    88          MOVE "SIM"  TO FIM-ARQ.
+    89
+    90 PRINCIPAL-ENTRADA    SECTION.
+    91     PERFORM SELECAO-ENTRADA.
+    92     PERFORM LEITURA-ENTRADA.
+    93
+    94 SELECAO-ENTRADA    SECTION.
+    95     IF IDADE-ENT >= 18
+    96         PERFORM GRAVACAO-ENTRADA.
+    97
+    98 GRAVACAO-ENTRADA SECTION.
+    99     MOVE NOME-ENT  TO NOME-TRAB.
+   100     MOVE IDADE-ENT TO IDADE-TRAB.
+   101     MOVE RG-ENT    TO RG-TRAB.
+   102     RELEASE REG-TRA.
+   103
+   104 FIM-ENTRADA  SECTION.
+   105     CLOSE   CADENT.
+   106
+   107
+   108
+   109
+   110
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Microsoft COBOL Version 4.5        L2.4 revision 002 09-Jun-20 09:15 Page   3
+*                                      PGM05.CBL
+* Data:        1268     Code:         493     Dictionary:        1615
